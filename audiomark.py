@@ -2,11 +2,9 @@ import wave
 import argparse
 import binascii
 
-# 128 = 0b10000000
-# Therefore 128 OR'd with anything replaces the left bit to 1
+# OR'ing anything with 0b01 replaces LSB to 1
 MASK_ONE = 1
-# 127 = 0b01111111
-# Similarly 127 AND'd with anything replaces the left bit to 0
+# Similarly AND'ing anything with 0b11111110 replaces the LSB to 0
 MASK_ZERO = 254
 
 def parser():
@@ -18,6 +16,9 @@ def parser():
     return args
 
 def mask(data, mask_bit):
+    '''
+    Replaces the LSB of `data` with `mask_bit`
+    '''
     if mask_bit == 1:
         return data | MASK_ONE
     else:
@@ -68,3 +69,10 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# TODO
+# ----
+# Don't read frames one at a time. Read everything together
+# and then do the encoding using bit depth and channel size.
+#
+# Accept a text file to hide instead of hardcoded 0's.
