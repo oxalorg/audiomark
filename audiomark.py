@@ -25,6 +25,10 @@ def mask(data, mask_bit):
         return data & MASK_ZERO
 
 def encode(in_wav, frames, msg_bit):
+    '''
+    overwrite the least significant bit of the frame
+    by masking it with a single bit from the message
+    '''
     odata = []
     for i in range(frames):
         frame = in_wav.readframes(1)
@@ -38,6 +42,10 @@ def encode(in_wav, frames, msg_bit):
 
 
 def msg_bit_gen(msg):
+    '''
+    takes input message and returns a binary generator/iterator
+    first 64 bits returned are the message length
+    '''
     bmsg = ''.join([ '{:016b}'.format(ord(i)) for i in msg])
     bmsg_size = '{:064b}'.format(len(bmsg)) # 64 bit binary representation
     print('Message in binary: ' + bmsg)
@@ -77,6 +85,7 @@ def main():
             iframe = bytearray(frame)
             # print(iframe[0] & 1, end='')
             if i < 64:
+                # first 64 bits are message length
                 size_string += '' + str(iframe[0] & 1)
                 i += 1
             elif i == 64:
@@ -84,6 +93,7 @@ def main():
                 print('\nSize of watermarked msg: ' + str(size) + ' bits.')
                 i += 1
             else:
+                # rest of the bits are the actual message
                 msg_string += str(iframe[0] & 1)
                 size -= 1
 
@@ -104,4 +114,3 @@ if __name__ == '__main__':
 # Don't read frames one at a time. Read everything together
 # and then do the encoding using bit depth and channel size.
 #
-# Accept a text file to hide instead of hardcoded 0's.
