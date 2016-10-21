@@ -63,7 +63,7 @@ def main():
 
     print(in_wav.getparams())
 
-    msg = 'thadomal shahani'
+    msg = 'Hello my name is mitesh shah! It\'s 2:45 in the morning!'
     msg_bit = msg_bit_gen(msg)
 
     opts = parser()
@@ -83,6 +83,7 @@ def main():
         while size:
             frame = out_wav.readframes(1)
             iframe = bytearray(frame)
+            print(iframe)
             # print(iframe[0] & 1, end='')
             if i < 64:
                 # first 64 bits are message length
