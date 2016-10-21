@@ -24,17 +24,29 @@ def mask(data, mask_bit):
     else:
         return data & MASK_ZERO
 
-def encode(in_wav, frames):
+def encode(in_wav, frames, msg_bit):
     odata = []
     for i in range(frames):
         frame = in_wav.readframes(1)
         iframe = bytearray(frame)
-        iframe[0] = mask(iframe[0], 0)
+        iframe[0] = mask(iframe[0], next(msg_bit))
         odata.append(bytes(iframe))
         print("Converting: {:>3.2f}%\r".format((i/frames*100)), end='')
 
     print("Converting: 100.00%")
     return odata
+
+
+def msg_bit_gen(msg):
+    bmsg = ''.join([ '{:016b}'.format(ord(i)) for i in msg])
+    bmsg_size = '{:064b}'.format(len(bmsg)) # 64 bit binary representation
+    print('Message in binary: ' + bmsg)
+    for bit in bmsg_size:
+        yield int(bit)
+    for bit in bmsg:
+        yield int(bit)
+    while True:
+        yield 0
 
 def main():
     in_wav = wave.open('in.wav', 'rb')
@@ -42,30 +54,47 @@ def main():
     frames = in_wav.getnframes()
 
     print(in_wav.getparams())
-    
-    msg = 'Hello. This is Mitesh.'
-    bmsg = [bin(ord(i)) for i in msg]
-    bmsg = ''.join(bmsg).replace('0b', '')
+
+    msg = 'thadomal shahani'
+    msg_bit = msg_bit_gen(msg)
 
     opts = parser()
     if opts.encode:
         out_wav = wave.open('out.wav', 'wb')
         out_wav.setparams(in_wav.getparams())
-        out_data = encode(in_wav, frames)
+        out_data = encode(in_wav, frames, msg_bit)
         out_wav.writeframes(b''.join(out_data))
         print("File sucessfully written.")
         out_wav.close()
     elif opts.decode:
         out_wav = wave.open('out.wav', 'rb')
-        print("Getting the LSB bits of first 5000 frames")
-        for i in range(5000):
+        size = frames
+        size_string = ''
+        msg_string = ''
+        i = 0
+        while size:
             frame = out_wav.readframes(1)
             iframe = bytearray(frame)
-            print(iframe[0] & 1, end='')
+            # print(iframe[0] & 1, end='')
+            if i < 64:
+                size_string += '' + str(iframe[0] & 1)
+                i += 1
+            elif i == 64:
+                size = int(size_string, 2)
+                print('\nSize of watermarked msg: ' + str(size) + ' bits.')
+                i += 1
+            else:
+                msg_string += str(iframe[0] & 1)
+                size -= 1
+
+        print('Hidden message in binary: ' + msg_string)
+        msg_decoded = [ chr(int(msg_string[i:i+7], 2)) for i in range(0, len(msg_string), 8)]
+        print('\n The message decoded is: ' + ''.join(msg_decoded))
         out_wav.close()
     else:
         print('Incorrect options.')
     in_wav.close()
+
 
 if __name__ == '__main__':
     main()
