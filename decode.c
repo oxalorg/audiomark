@@ -14,15 +14,10 @@ int main(int argc, char** argv)
     FILE *out;
     int msg_bits = 0;
     msg_bits = 5000;
-    /* Open the WAV file. */
     info.format = 0;
     sf = sf_open("out.wav",SFM_READ,&info);
-    if (sf == NULL)
-    {
-        printf("Failed to open the file.\n");
-        exit(-1);
-    }
-    /* Print some of the info, and figure out how much data to read. */
+
+    // save data frmo info
     f = info.frames;
     sr = info.samplerate;
     c = info.channels;
@@ -31,12 +26,11 @@ int main(int argc, char** argv)
     /* printf("channels=%d\n",c); */
     num_items = f*c;
     /* printf("num_items=%d\n",num_items); */
-    /* Allocate space for the data to be read, then read it. */
     buf = (char *) malloc(num_items*sizeof(char));
+    // assume 8 bit depth
     num = sf_read_raw(sf,buf,num_items*8);
     sf_close(sf);
     printf("Read %d items\n",num);
-    /* Write the data to filedata.out. */
     out = fopen("filedata.out","w");
     char hidden_msg[5000];
     int h = 0;

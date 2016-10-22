@@ -1,3 +1,4 @@
+import sys
 import wave
 import argparse
 import binascii
@@ -12,6 +13,7 @@ def parser():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--encode', dest='encode', action='store_true', help='encodes in.wav in current directory')
     parser.add_argument('--decode', dest='decode', action='store_true', help='decodes first 5000 frames of out.wav')
+    parser.add_argument('--message', dest='msg')
     args = parser.parse_args()
     return args
 
@@ -63,10 +65,9 @@ def main():
 
     print(in_wav.getparams())
 
-    msg = 'Hello my name is mitesh shah! It\'s 2:45 in the morning!'
-    msg_bit = msg_bit_gen(msg)
-
     opts = parser()
+    msg_bit = msg_bit_gen(opts.msg)
+
     if opts.encode:
         out_wav = wave.open('out.wav', 'wb')
         out_wav.setparams(in_wav.getparams())
